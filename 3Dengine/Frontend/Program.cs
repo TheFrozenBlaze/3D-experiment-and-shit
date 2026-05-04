@@ -1,26 +1,40 @@
 ﻿using System;
-using SDL2;
 using OpenTK.Graphics.OpenGL4;
+using SDL2;
+using Render;
 
-namespace Window{
-    class Initialize {
+class Initialize {
+
+
+        private static IntPtr GetProcAddress(string name) =>
+        SDL.SDL_GL_GetProcAddress(name);
+
+        private static void LoadGL()
+        {
+            var getProc = new Func<string, IntPtr>(GetProcAddress);
+            // OpenTK exposes GL.LoadBindings(Func<string, IntPtr>) in some builds:
+            var mi = typeof(GL).GetMethod("LoadBindings", new[] { typeof(Func<string, IntPtr>) });
+            if (mi != null) mi.Invoke(null, new object[] { getProc });
+        }
+
         static void Main(string[] args) {
+
+
             if(SDL.SDL_Init(SDL.SDL_INIT_VIDEO) < 0) {
                 Console.WriteLine(SDL.SDL_GetError());
             }else{
                 Console.WriteLine("Initialized");
             }
-            Renderer Re = new Renderer();
 
-            SDL.SDL_GL_SetAttribute(SDL.SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-            SDL.SDL_GL_SetAttribute(SDL.SDL_GL_CONTEXT_MINOR_VERSION, 3);
-
-            IntPtr Window = SDL.SDL_CreateWindow("Engine",SDL.SDL_WINDOWPOS_CENTERED,SDL.SDL_WINDOWPOS_CENTERED, 100, 100, SDL.SDL_WindowFlags.SDL_WINDOW_OPENGL, SDL.SDL_WindowFlags.SDL_WINDOW_RESIZABLE);
+            SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+            SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_CONTEXT_MINOR_VERSION, 3);
 
 
-            SDL.SDL_GLContext glContext = SDL.SDL_GL_CreateContext(Window);
+            IntPtr Window = SDL.SDL_CreateWindow("Engine",SDL.SDL_WINDOWPOS_CENTERED,SDL.SDL_WINDOWPOS_CENTERED, 100, 100, SDL.SDL_WindowFlags.SDL_WINDOW_OPENGL | SDL.SDL_WindowFlags.SDL_WINDOW_RESIZABLE);
 
-            GL.LoadBindings(new SDLBindingsContext());
+
+            IntPtr glContext = SDL.SDL_GL_CreateContext(Window);
+            LoadGL();
 
             if (Window == IntPtr.Zero)
             {
@@ -32,7 +46,7 @@ namespace Window{
             }
             bool running = true;
             SDL.SDL_Event e;
-            Re.Context(100, 100);
+            Objects.Context(100, 100);
 
             while (running)
             {
@@ -51,5 +65,5 @@ namespace Window{
 
 
         }
-    }
 }
+

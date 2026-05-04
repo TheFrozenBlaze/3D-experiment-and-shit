@@ -46,11 +46,7 @@
           "dependencies": {
             "OpenTK": {
               "target": "Package",
-              "version": "[4.9.4, )"
-            },
-            "SDL2-CS": {
-              "target": "Package",
-              "version": "[2.0.0, )"
+              "version": "[4.7.3, )"
             }
           },
           "imports": [
@@ -71,10 +67,6 @@
             },
             {
               "name": "Microsoft.NETCore.App.Host.linux-x64",
-              "version": "[9.0.14, 9.0.14]"
-            },
-            {
-              "name": "Microsoft.NETCore.App.Ref",
               "version": "[9.0.14, 9.0.14]"
             }
           ],
