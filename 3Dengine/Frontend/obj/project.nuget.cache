@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "G+LC9W5juVA=",
+  "dgSpecHash": "O8nGoDCkHzc=",
   "success": true,
   "projectFilePath": "/home/matyas/Documents/3Dengine/Frontend/Frontend.csproj",
   "expectedPackageFiles": [
@@ -16,7 +16,10 @@
     "/home/matyas/.nuget/packages/opentk.windowing.desktop/4.9.4/opentk.windowing.desktop.4.9.4.nupkg.sha512",
     "/home/matyas/.nuget/packages/opentk.windowing.graphicslibraryframework/4.9.4/opentk.windowing.graphicslibraryframework.4.9.4.nupkg.sha512",
     "/home/matyas/.nuget/packages/sdl2-cs/2.0.0/sdl2-cs.2.0.0.nupkg.sha512",
-    "/home/matyas/.nuget/packages/microsoft.aspnetcore.app.ref/10.0.4/microsoft.aspnetcore.app.ref.10.0.4.nupkg.sha512"
+    "/home/matyas/.nuget/packages/system.runtime.compilerservices.unsafe/6.0.0/system.runtime.compilerservices.unsafe.6.0.0.nupkg.sha512",
+    "/home/matyas/.nuget/packages/microsoft.aspnetcore.app.ref/9.0.14/microsoft.aspnetcore.app.ref.9.0.14.nupkg.sha512",
+    "/home/matyas/.nuget/packages/microsoft.netcore.app.host.linux-x64/9.0.14/microsoft.netcore.app.host.linux-x64.9.0.14.nupkg.sha512",
+    "/home/matyas/.nuget/packages/microsoft.netcore.app.ref/9.0.14/microsoft.netcore.app.ref.9.0.14.nupkg.sha512"
   ],
   "logs": []
 }

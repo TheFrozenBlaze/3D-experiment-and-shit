@@ -1,0 +1,5 @@
+/home/matyas/Documents/3Dengine/Frontend/obj/Debug/net9.0/Frontend.csproj.AssemblyReference.cache
+/home/matyas/Documents/3Dengine/Frontend/obj/Debug/net9.0/Frontend.GeneratedMSBuildEditorConfig.editorconfig
+/home/matyas/Documents/3Dengine/Frontend/obj/Debug/net9.0/Frontend.AssemblyInfoInputs.cache
+/home/matyas/Documents/3Dengine/Frontend/obj/Debug/net9.0/Frontend.AssemblyInfo.cs
+/home/matyas/Documents/3Dengine/Frontend/obj/Debug/net9.0/Frontend.csproj.CoreCompileInputs.cache
