@@ -8,7 +8,8 @@
     ".NETCoreApp,Version=v9.0": {
       "Frontend/1.0.0": {
         "dependencies": {
-          "OpenTK": "4.7.3"
+          "OpenTK": "4.7.3",
+          "SDL3-CS": "3.4.2"
         },
         "runtime": {
           "Frontend.dll": {}
@@ -144,6 +145,14 @@
             "fileVersion": "4.0.0.0"
           }
         }
+      },
+      "SDL3-CS/3.4.2": {
+        "runtime": {
+          "lib/net9.0/SDL3-CS.dll": {
+            "assemblyVersion": "3.4.2.0",
+            "fileVersion": "3.4.2.0"
+          }
+        }
       }
     }
   },
@@ -229,6 +238,13 @@
       "sha512": "sha512-6ANe+YQTvIiQLQHJv607C6faYcnpd63Cu2fszKR/vwfdiCPaJmHd/hzREQV6pY4skfmvD7MSK1ceLENDI20Oxg==",
       "path": "opentk.windowing.graphicslibraryframework/4.7.3",
       "hashPath": "opentk.windowing.graphicslibraryframework.4.7.3.nupkg.sha512"
+    },
+    "SDL3-CS/3.4.2": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-n6TAJACALo/JOVjItB5Sve981U6AmH3vodepQRKP8mH3RL1eHNGTxbVq/RliJFu60uyJB4/pfI+/M255cUuyGQ==",
+      "path": "sdl3-cs/3.4.2",
+      "hashPath": "sdl3-cs.3.4.2.nupkg.sha512"
     }
   }
 }

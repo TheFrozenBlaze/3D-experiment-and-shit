@@ -185,6 +185,19 @@
           }
         }
       },
+      "SDL3-CS/3.4.2": {
+        "type": "package",
+        "compile": {
+          "lib/net9.0/SDL3-CS.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net9.0/SDL3-CS.dll": {
+            "related": ".xml"
+          }
+        }
+      },
       "System.Runtime.CompilerServices.Unsafe/5.0.0": {
         "type": "package",
         "compile": {
@@ -365,6 +378,31 @@
         "opentk.windowing.graphicslibraryframework.nuspec"
       ]
     },
+    "SDL3-CS/3.4.2": {
+      "sha512": "n6TAJACALo/JOVjItB5Sve981U6AmH3vodepQRKP8mH3RL1eHNGTxbVq/RliJFu60uyJB4/pfI+/M255cUuyGQ==",
+      "type": "package",
+      "path": "sdl3-cs/3.4.2",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "CODE_OF_CONDUCT.md",
+        "LICENSE",
+        "README-nuget.md",
+        "README.md",
+        "SDL3-CS.xml",
+        "lib/net10.0/SDL3-CS.dll",
+        "lib/net10.0/SDL3-CS.xml",
+        "lib/net7.0/SDL3-CS.dll",
+        "lib/net7.0/SDL3-CS.xml",
+        "lib/net8.0/SDL3-CS.dll",
+        "lib/net8.0/SDL3-CS.xml",
+        "lib/net9.0/SDL3-CS.dll",
+        "lib/net9.0/SDL3-CS.xml",
+        "logo.png",
+        "sdl3-cs.3.4.2.nupkg.sha512",
+        "sdl3-cs.nuspec"
+      ]
+    },
     "System.Runtime.CompilerServices.Unsafe/5.0.0": {
       "sha512": "ZD9TMpsmYJLrxbbmdvhwt9YEgG5WntEnZ/d1eH8JBX9LBp+Ju8BSBhUGbZMNVHHomWo2KVImJhTDl2hIgw/6MA==",
       "type": "package",
@@ -400,7 +438,8 @@
   },
   "projectFileDependencyGroups": {
     "net9.0": [
-      "OpenTK >= 4.7.3"
+      "OpenTK >= 4.7.3",
+      "sdl3-cs >= 3.4.2"
     ]
   },
   "packageFolders": {
@@ -449,6 +488,10 @@
           "OpenTK": {
             "target": "Package",
             "version": "[4.7.3, )"
+          },
+          "sdl3-cs": {
+            "target": "Package",
+            "version": "[3.4.2, )"
           }
         },
         "imports": [

@@ -47,6 +47,10 @@
             "OpenTK": {
               "target": "Package",
               "version": "[4.7.3, )"
+            },
+            "SDL3-CS": {
+              "target": "Package",
+              "version": "[3.4.2, )"
             }
           },
           "imports": [
