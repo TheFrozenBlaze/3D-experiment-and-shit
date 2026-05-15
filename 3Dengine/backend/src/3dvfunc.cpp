@@ -40,7 +40,7 @@ public:
     std::vector<std::array<uint64_t, 3>> triangles;
 
     struct Face {
-        struct Vertex { int v, vt, vn; };
+        struct Vertex { uint32_t v, vt, vn; };
         std::vector<Face::Vertex> ver;
     };
 
@@ -159,7 +159,7 @@ public:
                     faceindex += 1; //self explanatory
                     vectorindex = 0;//vertex index actually
                     line.erase(0, 2); // cuts of the 'f' and the ' ' from the beginning
-                    cs.fvi.emplace_back();
+                    cs.fvi.emplace_back(); // next line wouldnt work without this
                     cs.fvi.back().ver.push_back({0,0,0});//creates space
                     int point = 2; //where the f-function writes its outputs (((2=v, 3=vt, 4=vn))
                     int number = 0;
@@ -179,6 +179,7 @@ public:
                                 number = 0;
                                 vectorindex++;
                                 point = 2;
+                                 cs.fvi.back().ver.push_back({0,0,0});
                                 continue;
                             } else if(point==3){
                                 number = std::stoi(numberstring); // checks for v/vt format
@@ -188,6 +189,7 @@ public:
                                 numberstring.clear();
                                 vectorindex++;
                                 point = 2;
+                                cs.fvi.back().ver.push_back({0,0,0});
                                 continue;
                             }else{
                                 number = std::stoi(numberstring); //checks for vn
@@ -198,7 +200,6 @@ public:
                                 point = 2;
                             }
                             if (i != line.size() - 1 && line[i] == ' ' ) {
-                                cs.fvi.emplace_back();
                                 cs.fvi.back().ver.push_back({0,0,0});
                             }
                             continue;
@@ -303,9 +304,9 @@ public:
             std::vector<float> temporaryz;
             std::vector<float> temporaryy;
             for(size_t j = 0; j < cs.fvi[i].ver.size(); j++) {
-                temporaryx.emplace_back(cs.vxc[cs.fvi[i].ver[j].v]);
-                temporaryy.emplace_back(cs.vyc[cs.fvi[i].ver[j].v]);
-                temporaryz.emplace_back(cs.vzc[cs.fvi[i].ver[j].v]);
+                temporaryx.emplace_back(cs.vxc[cs.fvi[i].ver[j].v-1]);
+                temporaryy.emplace_back(cs.vyc[cs.fvi[i].ver[j].v-1]);
+                temporaryz.emplace_back(cs.vzc[cs.fvi[i].ver[j].v-1]);
             }
             auto mmx = std::minmax_element(temporaryx.begin(), temporaryx.end());
             auto mmy = std::minmax_element(temporaryy.begin(), temporaryy.end());
@@ -336,112 +337,251 @@ public:
         uint8_t projection = 0;
         for(size_t i = 0; i < cs.fvi.size(); i++) {
             if(cs.fvi[i].ver.size() > 3) {
-                float x, y, z;
+                normal = { 0.0, 0.0 , 0.0};
+                float x, y, z, coordy, coordx, coordz;
+                int f = 1;
                 while(normal == std::array<float, 3>{0.0f, 0.0f, 0.0f}) {
-                    int f = 0;
-                    x = limit > cs.vyc[cs.fvi[i].ver[0+f].v]*cs.vzc[cs.fvi[i].ver[1+f].v]-cs.vyc[cs.fvi[i].ver[1+f].v]*cs.vzc[cs.fvi[i].ver[0+f].v] >= 0 ? 0 : cs.vyc[cs.fvi[i].ver[0+f].v]*cs.vzc[cs.fvi[i].ver[1+f].v]-cs.vyc[cs.fvi[i].ver[1+f].v]*cs.vzc[cs.fvi[i].ver[0+f].v], 
-                    y = limit > cs.vzc[cs.fvi[i].ver[0+f].v]*cs.vxc[cs.fvi[i].ver[1+f].v]-cs.vzc[cs.fvi[i].ver[1+f].v]*cs.vxc[cs.fvi[i].ver[0+f].v] >= 0 ? 0 : cs.vzc[cs.fvi[i].ver[0+f].v]*cs.vxc[cs.fvi[i].ver[1+f].v]-cs.vzc[cs.fvi[i].ver[1+f].v]*cs.vxc[cs.fvi[i].ver[0+f].v],
-                    z = limit > cs.vxc[cs.fvi[i].ver[0+f].v]*cs.vzc[cs.fvi[i].ver[1+f].v]-cs.vxc[cs.fvi[i].ver[1+f].v]*cs.vzc[cs.fvi[i].ver[0+f].v] >= 0 ? 0 : cs.vxc[cs.fvi[i].ver[0+f].v]*cs.vzc[cs.fvi[i].ver[1+f].v]-cs.vxc[cs.fvi[i].ver[1+f].v]*cs.vzc[cs.fvi[i].ver[0+f].v];
+                    if(f+1 == cs.fvi[i].ver.size()) {
+                        std::cout << "INVALID FACE" << std::endl;
+                        break;  
+                    } else {
+                    coordx = (cs.vyc[cs.fvi[i].ver[f].v-1]-cs.vyc[cs.fvi[i].ver[0].v-1])*(cs.vzc[cs.fvi[i].ver[1+f].v-1]-cs.vzc[cs.fvi[i].ver[0].v-1])-(cs.vyc[cs.fvi[i].ver[1+f].v-1]-cs.vyc[cs.fvi[i].ver[0].v-1])*(cs.vzc[cs.fvi[i].ver[0+f].v-1]-cs.vzc[cs.fvi[i].ver[0].v-1]); 
+                    coordy = (cs.vzc[cs.fvi[i].ver[f].v-1]-cs.vzc[cs.fvi[i].ver[0].v-1])*(cs.vxc[cs.fvi[i].ver[1+f].v-1]-cs.vxc[cs.fvi[i].ver[0].v-1])-(cs.vzc[cs.fvi[i].ver[1+f].v-1]-cs.vzc[cs.fvi[i].ver[0].v-1])*(cs.vxc[cs.fvi[i].ver[0+f].v-1]-cs.vxc[cs.fvi[i].ver[0].v-1]);
+                    coordz = (cs.vxc[cs.fvi[i].ver[f].v-1]-cs.vxc[cs.fvi[i].ver[0].v-1])*(cs.vyc[cs.fvi[i].ver[1+f].v-1]-cs.vyc[cs.fvi[i].ver[0].v-1])-(cs.vxc[cs.fvi[i].ver[1+f].v-1]-cs.vxc[cs.fvi[i].ver[0].v-1])*(cs.vyc[cs.fvi[i].ver[0+f].v-1]-cs.vyc[cs.fvi[i].ver[0].v-1]);
+                    x = limit > std::fabs(coordx) && std::fabs(coordx) >= 0 ? 0.0f : coordx; 
+                    y = limit > std::fabs(coordy) && std::fabs(coordy) >= 0 ? 0.0f : coordy;
+                    z = limit > std::fabs(coordz) && std::fabs(coordz) >= 0 ? 0.0f : coordz;
                     normal = {
                         x, y, z
                     };
-                    f++;
+                        f++;
+                    } 
                 }
-                i = 0;
+                f = 1;
                 float min =std::fabs(*std::min_element(normal.begin(), normal.end())), max = std::fabs(*std::max_element(normal.begin(), normal.end()));
                 int8_t dor = limit >= max-min && max-min >= 0 ? 0 : (max-min > 0 ? 1 : -1);
-                projection = dor == 0 ? std::distance(normal.begin(), std::max_element(normal.begin(), normal.end())) : dor > 1 ? std::distance(normal.begin(), std::max_element(normal.begin(), normal.end())) : std::distance(normal.begin(), std::max_element(normal.begin(), normal.end()));
-                std::vector<std::pair<int, bool>> vindices;
-                
+                projection = dor == 0 ? std::distance(normal.begin(), std::max_element(normal.begin(), normal.end())) : dor > 0 ? std::distance(normal.begin(), std::max_element(normal.begin(), normal.end())) : std::distance(normal.begin(), std::min_element(normal.begin(), normal.end()));
+                std::vector<int> vindices;
+                uint32_t v0, v1, v2;
+                size_t k = 0;
                 switch(projection) {
                     case 0:
                     if(x > 0) {
                         for(int j = 0; j < cs.fvi[i].ver.size(); j++) {
-                    vindices.emplace_back(j, true);
+                    vindices.emplace_back(j);
                     }
                     } else {
                         for(int j = 0; j < cs.fvi[i].ver.size(); j++) {
-                    vindices.emplace_back(cs.fvi[i].ver.size()-1-j, true);
+                    vindices.emplace_back(cs.fvi[i].ver.size()-1-j);
                     }
                     }
-                    int k = 0;
-                    float v0, v1, v2;
+                    
                         while(vindices.size() > 3) {
                             if(k == vindices.size())  {
                                 k = 0;
-                            }
-                                v0 = cs.fvi[i].ver[k].v;
-                                v1 = k+1 == vindices.size() ? cs.fvi[i].ver[0].v : cs.fvi[i].ver[k+1].v;
-                                v2 = k+2 >= vindices.size() ? cs.fvi[i].ver[k+2-vindices.size()].v : cs.fvi[i].ver[k+2].v;
+                            }   size_t r;
+                                v0 = cs.fvi[i].ver[vindices[k]].v-1;
+                                r = k+1 == vindices.size() ? 0 : k+1;
+                                v1 = k+1 == vindices.size() ? cs.fvi[i].ver[vindices[0]].v-1 : cs.fvi[i].ver[vindices[k+1]].v-1;
+                                v2 = v2 = cs.fvi[i].ver[vindices[(k+2) % vindices.size()]].v - 1;
+                                
                                 std::array<float, 2>rv1 = {cs.vyc[v1] - cs.vyc[v0],cs.vzc[v1] - cs.vzc[v0]};
                                 std::array<float, 2>rv2 = {cs.vyc[v2] - cs.vyc[v0],cs.vzc[v2] - cs.vzc[v0]};
-                                bool reflexcheck = (rv2[0]/rv1[0])*rv1[1] >= rv2[1] ? true : false;
+                                bool reflexcheck = rv1[0] * rv2[1] - rv1[1] * rv2[0] <= 0 ? true : false;
                                 if(reflexcheck == true) {
                                     k++;
                                     continue;
                                 } else {
+                                    bool removed =false;
                                     bool valid = true;
-                                    for(size_t l = k+2; l < vindices.size()+1 && l != k ; l++) {
-                                        if(l == vindices.size()) {
-                                            l = 0;
-                                        } 
-                                        if(vindices[l].second == false) {
-                                            continue;
-                                        } else {
-                                            std::array<float, 2> p = {cs.vyc[cs.fvi[i].ver[vindices[l].first].v], cs.vzc[cs.fvi[i].ver[vindices[l].first].v]};
+                                    for(size_t step = 0; step < vindices.size(); step++) { 
+                                            size_t l = (k + 3 + step) % vindices.size();
+                                            std::array<float, 2> p = {cs.vyc[cs.fvi[i].ver[vindices[l]].v-1], cs.vzc[cs.fvi[i].ver[vindices[l]].v-1]};
                                             std::array<float, 2> tp1 = {cs.vyc[v0], cs.vzc[v0]};
                                             std::array<float, 2> tp2 = {cs.vyc[v1], cs.vzc[v1]};
                                             std::array<float, 2> tp3 = {cs.vyc[v2], cs.vzc[v2]};
                                             struct CPpair {
-                                                float ad;
-                                                float bc;
+                                                float ad = 0;
+                                                float bc = 0;
                                                 float product = ad - bc;
                                             } ABP, ACP, BCP;
                                             ABP.ad = (tp2[0] - tp1[0]) * (p[1] - tp1[1]);
                                             ABP.bc = (tp2[1] - tp1[1]) * (p[0] - tp1[0]);
-                                            ACP.ad = (tp3[0] - tp3[0]) * (p[1] - tp1[1]);
-                                            ACP.bc = (tp3[1] - tp3[1]) * (p[0] - tp1[0]);
+                                            ACP.ad = (tp1[0] - tp3[0]) * (p[1] - tp3[1]); 
+                                            ACP.bc = (tp1[1] - tp3[1]) * (p[0] - tp3[0]);
                                             BCP.ad = (tp3[0] - tp2[0]) * (p[1] - tp2[1]);
                                             BCP.bc = (tp3[1] - tp2[1]) * (p[0] - tp2[0]);
-                                            bool hasNeg = (ABP.product < 0) || (ACP.product < 0) || (BCP.product < 0);
-                                            bool hasPos = (ABP.product > 0) || (ACP.product > 0) || (BCP.product > 0);
-                                            valid = !(hasNeg && hasPos);
+                                            ABP.product = ABP.ad - ABP.bc;
+                                            ACP.product = ACP.ad - ACP.bc;
+                                            BCP.product = BCP.ad - BCP.bc;
+                                            valid = (ABP.product > limit) && (ACP.product > limit) && (BCP.product > limit);
+                                        if(valid == true) {
+                                                k++;
+                                                break;
+                                            }
                                         }
-                                    }
-                                }
+                                        if (valid == false) {
+                                            cs.triangles.emplace_back(std::array<long unsigned int, 3>{v0+1, v1+1, v2+1});
+                                            vindices.erase(vindices.begin() + r);
+                                            removed = true;
+                                            k = 0;
+                                        }
+                                       /*if (!removed) {
+                                            
+                                            std::cout << "INVALID FACE\n";
+                                            break;
+                                        } */ // Fix this later
 
-                        }
+                                    }                                   
+                                }
                     break;
                     case 1:
                     if(y > 0) {
                         for(int j = 0; j < cs.fvi[i].ver.size(); j++) {
-                    vindices.emplace_back(j, true);
+                    vindices.emplace_back(j);
                     }
                     } else {
                         for(int j = 0; j < cs.fvi[i].ver.size(); j++) {
-                    vindices.emplace_back(cs.fvi[i].ver.size()-1-j, true);
+                    vindices.emplace_back(cs.fvi[i].ver.size()-1-j);
                     }
                     }
+
+                        while(vindices.size() > 3) {
+                            if(k == vindices.size())  {
+                                k = 0;
+                            }   size_t r;
+                                v0 = cs.fvi[i].ver[vindices[k]].v-1;
+                                r = k+1 == vindices.size() ? 0 : k+1;
+                                v1 = k+1 == vindices.size() ? cs.fvi[i].ver[vindices[0]].v-1 : cs.fvi[i].ver[vindices[k+1]].v-1;
+                                v2 = v2 = cs.fvi[i].ver[vindices[(k+2) % vindices.size()]].v - 1;
+                                
+                                std::array<float, 2>rv1 = {cs.vxc[v1] - cs.vxc[v0],cs.vzc[v1] - cs.vzc[v0]};
+                                std::array<float, 2>rv2 = {cs.vxc[v2] - cs.vxc[v0],cs.vzc[v2] - cs.vzc[v0]};
+                                bool reflexcheck = rv1[0] * rv2[1] - rv1[1] * rv2[0] <= 0 ? true : false;
+                                if(reflexcheck == true) {
+                                    k++;
+                                    continue;
+                                } else {
+                                    bool removed =false;
+                                    bool valid = true;
+                                    for(size_t step = 0; step < vindices.size(); step++) { 
+                                            size_t l = (k + 3 + step) % vindices.size();
+                                            std::array<float, 2> p = {cs.vxc[cs.fvi[i].ver[vindices[l]].v-1], cs.vzc[cs.fvi[i].ver[vindices[l]].v-1]};
+                                            std::array<float, 2> tp1 = {cs.vxc[v0], cs.vzc[v0]};
+                                            std::array<float, 2> tp2 = {cs.vxc[v1], cs.vzc[v1]};
+                                            std::array<float, 2> tp3 = {cs.vxc[v2], cs.vzc[v2]};
+                                            struct CPpair {
+                                                float ad = 0;
+                                                float bc = 0;
+                                                float product = ad - bc;
+                                            } ABP, ACP, BCP;
+                                            ABP.ad = (tp2[0] - tp1[0]) * (p[1] - tp1[1]);
+                                            ABP.bc = (tp2[1] - tp1[1]) * (p[0] - tp1[0]);
+                                            ACP.ad = (tp1[0] - tp3[0]) * (p[1] - tp3[1]); 
+                                            ACP.bc = (tp1[1] - tp3[1]) * (p[0] - tp3[0]);
+                                            BCP.ad = (tp3[0] - tp2[0]) * (p[1] - tp2[1]);
+                                            BCP.bc = (tp3[1] - tp2[1]) * (p[0] - tp2[0]);
+                                            ABP.product = ABP.ad - ABP.bc;
+                                            ACP.product = ACP.ad - ACP.bc;
+                                            BCP.product = BCP.ad - BCP.bc;
+                                            valid = (ABP.product > limit) && (ACP.product > limit) && (BCP.product > limit);
+                                        if(valid == true) {
+                                                k++;
+                                                break;
+                                            } 
+                                        }
+                                        if (valid == false) {
+                                            cs.triangles.emplace_back(std::array<long unsigned int, 3>{v0+1, v1+1, v2+1});
+                                            vindices.erase(vindices.begin() + r);
+                                            removed = true;
+                                            k = 0;
+                                        }
+                                        /*if (!removed) {
+                                            
+                                            std::cout << "INVALID FACE\n";
+                                            break;
+                                        } */ // Fix this later
+                                    }
+                                }
                     break;
                     case 2:
                     if(z > 0) {
                         for(int j = 0; j < cs.fvi[i].ver.size(); j++) {
-                    vindices.emplace_back(j, true);
+                    vindices.emplace_back(j);
                     }
                     } else {
                         for(int j = 0; j < cs.fvi[i].ver.size(); j++) {
-                    vindices.emplace_back(cs.fvi[i].ver.size()-1-j, true);
+                    vindices.emplace_back(cs.fvi[i].ver.size()-1-j);
                     }
                     }
+                        while(vindices.size() > 3) {
+                            if(k == vindices.size())  {
+                                k = 0;
+                            }   size_t r;
+                                v0 = cs.fvi[i].ver[vindices[k]].v-1;
+                                r = k+1 == vindices.size() ? 0 : k+1;
+                                v1 = k+1 == vindices.size() ? cs.fvi[i].ver[vindices[0]].v-1 : cs.fvi[i].ver[vindices[k+1]].v-1;
+                                v2 = cs.fvi[i].ver[vindices[(k+2) % vindices.size()]].v - 1;
+                                
+                                std::array<float, 2>rv1 = {cs.vxc[v1] - cs.vxc[v0],cs.vyc[v1] - cs.vyc[v0]};
+                                std::array<float, 2>rv2 = {cs.vxc[v2] - cs.vxc[v0],cs.vyc[v2] - cs.vyc[v0]};
+                                bool reflexcheck = rv1[0] * rv2[1] - rv1[1] * rv2[0] <= 0 ? true : false;
+                                if(reflexcheck == true) {
+                                    k++;
+                                    continue;
+                                } else {
+                                    bool removed =false;
+                                    bool valid = true;
+                                    for(size_t step = 0; step < vindices.size(); step++) { 
+                                            size_t l = (k + 3 + step) % vindices.size();
+                                            std::array<float, 2> p = {cs.vxc[cs.fvi[i].ver[vindices[l]].v-1], cs.vyc[cs.fvi[i].ver[vindices[l]].v-1]};
+                                            std::array<float, 2> tp1 = {cs.vxc[v0], cs.vyc[v0]};
+                                            std::array<float, 2> tp2 = {cs.vxc[v1], cs.vyc[v1]};
+                                            std::array<float, 2> tp3 = {cs.vxc[v2], cs.vyc[v2]};
+                                            struct CPpair {
+                                                float ad = 0;
+                                                float bc = 0;
+                                                float product = ad - bc;
+                                            } ABP, ACP, BCP;
+                                            ABP.ad = (tp2[0] - tp1[0]) * (p[1] - tp1[1]);
+                                            ABP.bc = (tp2[1] - tp1[1]) * (p[0] - tp1[0]);
+                                            ACP.ad = (tp1[0] - tp3[0]) * (p[1] - tp3[1]); 
+                                            ACP.bc = (tp1[1] - tp3[1]) * (p[0] - tp3[0]);
+                                            BCP.ad = (tp3[0] - tp2[0]) * (p[1] - tp2[1]);
+                                            BCP.bc = (tp3[1] - tp2[1]) * (p[0] - tp2[0]);
+                                            ABP.product = ABP.ad - ABP.bc;
+                                            ACP.product = ACP.ad - ACP.bc;
+                                            BCP.product = BCP.ad - BCP.bc;
+                                            valid = (ABP.product > limit) && (ACP.product > limit) && (BCP.product > limit);
+                                        if(valid == true) {
+                                                k++;
+                                                break;
+                                            } 
+                                        }
+                                        if (valid == false) {
+                                            cs.triangles.emplace_back(std::array<long unsigned int, 3>{v0+1, v1+1, v2+1});
+                                            vindices.erase(vindices.begin() + r);
+                                            removed = true;
+                                            k = 0;
+                                        }
+                                        /*if (!removed) {
+                                            
+                                            std::cout << "INVALID FACE\n";
+                                            break;
+                                        } */ // Fix this later
+                                    }
+                                }
                     break;
+                
                 }
             } else {
-                cs.triangles.emplace_back(cs.fvi[i].ver[0].v, cs.fvi[i].ver[1].v, cs.fvi[i].ver[2].v);
+                cs.triangles.emplace_back(std::array<long unsigned int, 3>{cs.fvi[i].ver[0].v, cs.fvi[i].ver[1].v, cs.fvi[i].ver[2].v});
                 continue;
             }
-        }
+        }  
     };
 };
+
 
 //ONLY FOR RENDERED OBJECTS
 class Transformation {
@@ -546,6 +686,7 @@ public:
                 break;
             }
         }
+    
     };
 
 
