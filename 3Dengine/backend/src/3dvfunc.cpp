@@ -6,7 +6,8 @@
 #include <sstream>
 #include <algorithm>
 #include <cstdint>
-
+#include <array>
+#include <utility>
 
 struct Coord {
 public:
@@ -36,7 +37,7 @@ public:
     std::vector<float> tvzc;
     //usable faces(that could be intersected)
     std::vector<int> usable;
-
+    std::vector<std::array<uint64_t, 3>> triangles;
 
     struct Face {
         struct Vertex { int v, vt, vn; };
@@ -302,9 +303,9 @@ public:
             std::vector<float> temporaryz;
             std::vector<float> temporaryy;
             for(size_t j = 0; j < cs.fvi[i].ver.size(); j++) {
-                temporaryx.emplace_back(cs.vxc[cs.fvi[i].ver[j].v]-1);
-                temporaryy.emplace_back(cs.vyc[cs.fvi[i].ver[j].v]-1);
-                temporaryz.emplace_back(cs.vzc[cs.fvi[i].ver[j].v]-1);
+                temporaryx.emplace_back(cs.vxc[cs.fvi[i].ver[j].v]);
+                temporaryy.emplace_back(cs.vyc[cs.fvi[i].ver[j].v]);
+                temporaryz.emplace_back(cs.vzc[cs.fvi[i].ver[j].v]);
             }
             auto mmx = std::minmax_element(temporaryx.begin(), temporaryx.end());
             auto mmy = std::minmax_element(temporaryy.begin(), temporaryy.end());
@@ -326,6 +327,118 @@ public:
             if (zmax < vzmin || zmin > vzmax) continue;
 
             cs.usable.push_back(i);
+        }
+    };
+
+    void Triangulator() {
+        float limit = 1e-6;
+        std::array<float, 3> normal = {0.0, 0.0, 0.0};
+        uint8_t projection = 0;
+        for(size_t i = 0; i < cs.fvi.size(); i++) {
+            if(cs.fvi[i].ver.size() > 3) {
+                float x, y, z;
+                while(normal == std::array<float, 3>{0.0f, 0.0f, 0.0f}) {
+                    int f = 0;
+                    x = limit > cs.vyc[cs.fvi[i].ver[0+f].v]*cs.vzc[cs.fvi[i].ver[1+f].v]-cs.vyc[cs.fvi[i].ver[1+f].v]*cs.vzc[cs.fvi[i].ver[0+f].v] >= 0 ? 0 : cs.vyc[cs.fvi[i].ver[0+f].v]*cs.vzc[cs.fvi[i].ver[1+f].v]-cs.vyc[cs.fvi[i].ver[1+f].v]*cs.vzc[cs.fvi[i].ver[0+f].v], 
+                    y = limit > cs.vzc[cs.fvi[i].ver[0+f].v]*cs.vxc[cs.fvi[i].ver[1+f].v]-cs.vzc[cs.fvi[i].ver[1+f].v]*cs.vxc[cs.fvi[i].ver[0+f].v] >= 0 ? 0 : cs.vzc[cs.fvi[i].ver[0+f].v]*cs.vxc[cs.fvi[i].ver[1+f].v]-cs.vzc[cs.fvi[i].ver[1+f].v]*cs.vxc[cs.fvi[i].ver[0+f].v],
+                    z = limit > cs.vxc[cs.fvi[i].ver[0+f].v]*cs.vzc[cs.fvi[i].ver[1+f].v]-cs.vxc[cs.fvi[i].ver[1+f].v]*cs.vzc[cs.fvi[i].ver[0+f].v] >= 0 ? 0 : cs.vxc[cs.fvi[i].ver[0+f].v]*cs.vzc[cs.fvi[i].ver[1+f].v]-cs.vxc[cs.fvi[i].ver[1+f].v]*cs.vzc[cs.fvi[i].ver[0+f].v];
+                    normal = {
+                        x, y, z
+                    };
+                    f++;
+                }
+                i = 0;
+                float min =std::fabs(*std::min_element(normal.begin(), normal.end())), max = std::fabs(*std::max_element(normal.begin(), normal.end()));
+                int8_t dor = limit >= max-min && max-min >= 0 ? 0 : (max-min > 0 ? 1 : -1);
+                projection = dor == 0 ? std::distance(normal.begin(), std::max_element(normal.begin(), normal.end())) : dor > 1 ? std::distance(normal.begin(), std::max_element(normal.begin(), normal.end())) : std::distance(normal.begin(), std::max_element(normal.begin(), normal.end()));
+                std::vector<std::pair<int, bool>> vindices;
+                
+                switch(projection) {
+                    case 0:
+                    if(x > 0) {
+                        for(int j = 0; j < cs.fvi[i].ver.size(); j++) {
+                    vindices.emplace_back(j, true);
+                    }
+                    } else {
+                        for(int j = 0; j < cs.fvi[i].ver.size(); j++) {
+                    vindices.emplace_back(cs.fvi[i].ver.size()-1-j, true);
+                    }
+                    }
+                    int k = 0;
+                    float v0, v1, v2;
+                        while(vindices.size() > 3) {
+                            if(k == vindices.size())  {
+                                k = 0;
+                            }
+                                v0 = cs.fvi[i].ver[k].v;
+                                v1 = k+1 == vindices.size() ? cs.fvi[i].ver[0].v : cs.fvi[i].ver[k+1].v;
+                                v2 = k+2 >= vindices.size() ? cs.fvi[i].ver[k+2-vindices.size()].v : cs.fvi[i].ver[k+2].v;
+                                std::array<float, 2>rv1 = {cs.vyc[v1] - cs.vyc[v0],cs.vzc[v1] - cs.vzc[v0]};
+                                std::array<float, 2>rv2 = {cs.vyc[v2] - cs.vyc[v0],cs.vzc[v2] - cs.vzc[v0]};
+                                bool reflexcheck = (rv2[0]/rv1[0])*rv1[1] >= rv2[1] ? true : false;
+                                if(reflexcheck == true) {
+                                    k++;
+                                    continue;
+                                } else {
+                                    bool valid = true;
+                                    for(size_t l = k+2; l < vindices.size()+1 && l != k ; l++) {
+                                        if(l == vindices.size()) {
+                                            l = 0;
+                                        } 
+                                        if(vindices[l].second == false) {
+                                            continue;
+                                        } else {
+                                            std::array<float, 2> p = {cs.vyc[cs.fvi[i].ver[vindices[l].first].v], cs.vzc[cs.fvi[i].ver[vindices[l].first].v]};
+                                            std::array<float, 2> tp1 = {cs.vyc[v0], cs.vzc[v0]};
+                                            std::array<float, 2> tp2 = {cs.vyc[v1], cs.vzc[v1]};
+                                            std::array<float, 2> tp3 = {cs.vyc[v2], cs.vzc[v2]};
+                                            struct CPpair {
+                                                float ad;
+                                                float bc;
+                                                float product = ad - bc;
+                                            } ABP, ACP, BCP;
+                                            ABP.ad = (tp2[0] - tp1[0]) * (p[1] - tp1[1]);
+                                            ABP.bc = (tp2[1] - tp1[1]) * (p[0] - tp1[0]);
+                                            ACP.ad = (tp3[0] - tp3[0]) * (p[1] - tp1[1]);
+                                            ACP.bc = (tp3[1] - tp3[1]) * (p[0] - tp1[0]);
+                                            BCP.ad = (tp3[0] - tp2[0]) * (p[1] - tp2[1]);
+                                            BCP.bc = (tp3[1] - tp2[1]) * (p[0] - tp2[0]);
+                                            bool hasNeg = (ABP.product < 0) || (ACP.product < 0) || (BCP.product < 0);
+                                            bool hasPos = (ABP.product > 0) || (ACP.product > 0) || (BCP.product > 0);
+                                            valid = !(hasNeg && hasPos);
+                                        }
+                                    }
+                                }
+
+                        }
+                    break;
+                    case 1:
+                    if(y > 0) {
+                        for(int j = 0; j < cs.fvi[i].ver.size(); j++) {
+                    vindices.emplace_back(j, true);
+                    }
+                    } else {
+                        for(int j = 0; j < cs.fvi[i].ver.size(); j++) {
+                    vindices.emplace_back(cs.fvi[i].ver.size()-1-j, true);
+                    }
+                    }
+                    break;
+                    case 2:
+                    if(z > 0) {
+                        for(int j = 0; j < cs.fvi[i].ver.size(); j++) {
+                    vindices.emplace_back(j, true);
+                    }
+                    } else {
+                        for(int j = 0; j < cs.fvi[i].ver.size(); j++) {
+                    vindices.emplace_back(cs.fvi[i].ver.size()-1-j, true);
+                    }
+                    }
+                    break;
+                }
+            } else {
+                cs.triangles.emplace_back(cs.fvi[i].ver[0].v, cs.fvi[i].ver[1].v, cs.fvi[i].ver[2].v);
+                continue;
+            }
         }
     };
 };
@@ -434,7 +547,7 @@ public:
             }
         }
     };
-};
+
 
 
 /*float transvert = cs.vyc[i]*horizontal + cs.vyc[i]*vertical;
