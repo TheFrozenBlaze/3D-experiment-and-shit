@@ -120,7 +120,7 @@ void GL::Draw(float prevx, float prevy, GLuint& grVAO, GLuint& grVBO)
     glUniform1i(boolloc, GL_TRUE);
     glUniform3f(colorLoc, 1.f,1.f,1.f);
     glBufferData(GL_ARRAY_BUFFER,gridvert.size() * sizeof(std::pair<float, float>), gridvert.data(), GL_DYNAMIC_DRAW);
-    glDrawArrays(GL_LINES, 0, gridvert.size() * 2);
+    glDrawArrays(GL_LINES, 0, gridvert.size());
     for (size_t i{}; i < obj.objects.size(); i++) {
         Coord &cs = obj.objects[i];
 
